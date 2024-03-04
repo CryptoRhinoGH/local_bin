@@ -1,0 +1,24 @@
+#!/opt/homebrew/bin/bash
+#(
+# Task Identifier
+TASK="$1"
+source .env
+# Read the output from stdin
+OUTPUT=$(</dev/stdin)
+
+# Current timestamp
+TIMESTAMP=$(date "+%Y-%m-%d %H:%M:%S")
+
+# Prepare the message, escaping double quotes for JSON
+MESSAGE=$(printf '%s' "$TASK complete $TIMESTAMP\nOUTPUT-\n$OUTPUT" | sed 's/"/\\"/g')
+
+# Telegram credentials
+TOKEN="$TOKEN"
+CHAT_ID="$CHAT_ID"
+
+# Prepare the data using jq for JSON encoding
+# Use `printf` and bash parameter expansion to create the JSON string with newlines
+DATA='{"chat_id": "%s", "text": "%s", "parse_mode": "HTML"}'
+printf -v DATA "$DATA" "$CHAT_ID" "$MESSAGE"
+curl -s -X POST "https://api.telegram.org/bot$TOKEN/sendMessage" -d "$DATA" -H "Content-Type: application/json" > /dev/null
+#)
